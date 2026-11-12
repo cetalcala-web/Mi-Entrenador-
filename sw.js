@@ -1,37 +1,15 @@
-
-// Mi Entrenador - GitHub Pages
-const CACHE = 'mi-entrenador-static-13';
-
+// Mi Entrenador - GitHub Pages, sin cachear los datos ni el HTML
+const CACHE = 'mi-entrenador-static-14';
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE).then(cache =>
-      cache.addAll([
-        './icon-192.png',
-        './icon-512.png',
-        './manifest.webmanifest'
-      ])
-    )
-  );
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(['./icon-192.png','./icon-512.png','./manifest.webmanifest'])));
   self.skipWaiting();
 });
-
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(k => k.startsWith('mi-entrenador-static-') && k !== CACHE)
-          .map(k => caches.delete(k))
-      )
-    )
-  );
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('mi-entrenador-static-') && k !== CACHE).map(k => caches.delete(k)))));
   self.clients.claim();
 });
-
 self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
   }
 });
