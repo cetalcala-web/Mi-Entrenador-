@@ -109,7 +109,7 @@ const cloudStorage=k=>`mi_entrenador_cloud_06_${cloudUser.id}_${k}`;
 function cloudStatus(message){cloudEl('cloudStatus').textContent=message}
 function cloudHasData(x){return x&&['plans','foods','metrics','templates','foodLogs','dailyHabits','libraryFavorites'].some(k=>Array.isArray(x[k])&&x[k].length)}
 function cloudLocalSave(){localStorage.setItem(KEY,cloudJSON(db))}
-function cloudValidate(x){if(!x||!Array.isArray(x.plans)||!Array.isArray(x.foods)||!Array.isArray(x.metrics))throw Error('Los datos de la nube no tienen un formato compatible.');return {plans:x.plans,foods:x.foods,metrics:x.metrics,templates:Array.isArray(x.templates)?x.templates:[],foodLogs:Array.isArray(x.foodLogs)?x.foodLogs:[],nutritionSettings:x.nutritionSettings||{},profile:x.profile||{},dailyHabits:Array.isArray(x.dailyHabits)?x.dailyHabits:[],libraryFavorites:Array.isArray(x.libraryFavorites)?x.libraryFavorites:[],trainingPreferences:x.trainingPreferences||{run:'intermedio',strength:'intermedio'},sportAssessment:x.sportAssessment||{},trainingCycle:x.trainingCycle||{}}}
+function cloudValidate(x){if(!x||!Array.isArray(x.plans)||!Array.isArray(x.foods)||!Array.isArray(x.metrics))throw Error('Los datos de la nube no tienen un formato compatible.');return {plans:x.plans,foods:x.foods,metrics:x.metrics,templates:Array.isArray(x.templates)?x.templates:[],foodLogs:Array.isArray(x.foodLogs)?x.foodLogs:[],nutritionSettings:x.nutritionSettings||{},profile:x.profile||{},dailyHabits:Array.isArray(x.dailyHabits)?x.dailyHabits:[],libraryFavorites:Array.isArray(x.libraryFavorites)?x.libraryFavorites:[],trainingPreferences:x.trainingPreferences||{run:'intermedio',strength:'intermedio'},sportAssessment:x.sportAssessment||{},trainingCycle:x.trainingCycle||{},v18Menus:x.v18Menus||{}}}
 function cloudAdopt(x){db=cloudValidate(x);for(let p of db.plans){p.mode??='strength';p.settings??={rounds:3,work:40,rest:20,roundRest:90};p.progress??=[];p.status??='planned'}db.foodLogs??=[];db.nutritionSettings??={};db.profile??={};db.dailyHabits??=[];db.libraryFavorites??=[];db.trainingPreferences??={run:'intermedio',strength:'intermedio'};db.sportAssessment??={};db.trainingCycle??={};active=null;stopClock();cloudLocalSave();render()}
 function cloudRemember(x,stamp){cloudBaseline=cloudJSON(cloudValidate(x));cloudTimestamp=stamp;localStorage.setItem(cloudStorage('baseline'),cloudBaseline);localStorage.setItem(cloudStorage('stamp'),stamp||'')}
 function cloudScheduleSave(){if(cloudUser)cloudStatus('Cambios locales pendientes · pulsa Subir')}
@@ -686,4 +686,84 @@ window.r16Leave=function(){stopClock();persist();tab('home')};
 finish=function(){let p=current();if(isRun(p)){let left=runRows(p).filter(r=>!getDone(p,r.key));if(left.length&&!confirm(`Quedan ${left.length} bloques sin registrar. ¿Finalizar de todos modos?`))return;stopClock();p.status='completed';p.finishedAt=new Date().toISOString();persist();tab('history');return}previousFinish()};
 })();
 </script>
+
+<style id="v18-visual">
+:root{--v18-a:#28c3a1;--v18-b:#8c9dff}
+#nutrition .v18-hero{padding:19px;border-radius:19px;background:linear-gradient(125deg,#113c43,#1b304a 65%,#303758);border:1px solid #3d6b78;margin:12px 0;color:#f4ffff}
+#nutrition .v18-hero h2{margin:3px 0 7px;font-size:1.45rem}
+#nutrition .v18-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+#nutrition .v18-day{font-size:12px;color:#b8e6de}
+#nutrition .v18-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+#nutrition .v18-tile{background:#ffffff12;border:1px solid #ffffff22;border-radius:13px;padding:10px 7px;text-align:center}
+#nutrition .v18-tile b{display:block;font-size:19px;color:#fff}
+#nutrition .v18-tile small{color:#c9e1e2}
+#nutrition .v18-meal{border:1px solid #6b829655;border-radius:17px;overflow:hidden;margin:13px 0;background:var(--card,#172c38)}
+#nutrition .v18-mealhead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 14px;background:linear-gradient(90deg,#29605d44,#26395b44)}
+#nutrition .v18-mealhead h3{margin:0;font-size:17px}
+#nutrition .v18-food{padding:12px 14px;border-top:1px solid #7893a52a}
+#nutrition .v18-foodmain{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#nutrition .v18-foodmain strong{font-size:14px}
+#nutrition .v18-foodmain small{white-space:nowrap}
+#nutrition .v18-meta{font-size:12px;opacity:.8;margin:4px 0}
+#nutrition .v18-actions{display:flex;flex-wrap:wrap;gap:7px;margin:9px 0 0}
+#nutrition .v18-actions button{padding:8px 10px;font-size:12px}
+#nutrition .v18-edit{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+#nutrition .v18-edit input,#nutrition .v18-edit select{width:100%;box-sizing:border-box}
+#nutrition .v18-foot{padding:12px 14px;border-top:1px solid #7893a544;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+#nutrition .v18-muted{font-size:12px;opacity:.78}
+#nutrition .v18-warning{border-left:3px solid #e7bb6c;padding:8px 11px;font-size:12px;background:#c9953330;border-radius:5px;margin-top:10px}
+#nutrition .v18-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+#nutrition .v18-pills span{background:#458d8060;border-radius:99px;padding:3px 8px;font-size:11px}
+body .card{border-radius:17px}
+body button{transition:filter .15s,transform .15s}body button:active{transform:scale(.98)}
+@media(max-width:420px){#nutrition .v18-tiles{gap:5px}#nutrition .v18-tile b{font-size:16px}#nutrition .v18-foodmain{align-items:flex-start}}
+</style>
+<script id="v18-nutrition">
+(function(){
+'use strict';
+const catalog=n09Catalog;
+const groups={
+protein:['pollo','ternera','atun','salmon','pavo','huevo','legumbres'],
+carb:['arroz','pasta','patata','pan','avena','legumbres'],
+fat:['aguacate','aceite','frutos','queso'],
+fruit:['platano','manzana'],
+veg:['ensalada','verduras','tomate'],
+dairy:['yogur','leche','queso'],
+other:['cafe','vino','cerveza']};
+const menus=[
+{Desayuno:[['pan',1],['aguacate',1],['pavo',1],['leche',1]],Comida:[['pollo',1],['arroz',1],['ensalada',1],['aceite',1]],Cena:[['salmon',1],['patata',1],['verduras',1]]},
+{Desayuno:[['avena',1.2],['leche',1.5],['platano',1]],Comida:[['legumbres',1.5],['atun',1],['tomate',1],['aceite',1]],Cena:[['huevo',2.5],['pan',1],['ensalada',1]]},
+{Desayuno:[['pan',1],['huevo',2],['tomate',1],['leche',1]],Comida:[['ternera',1],['patata',1.5],['verduras',1],['aceite',1]],Cena:[['pollo',.8],['ensalada',1.5],['aguacate',1]]},
+{Desayuno:[['yogur',2],['avena',1],['manzana',1]],Comida:[['pasta',1.5],['pollo',1],['tomate',1],['aceite',1]],Cena:[['atun',1.5],['pan',1],['ensalada',1],['aguacate',1]]},
+{Desayuno:[['pan',1],['pavo',1.5],['aguacate',1],['cafe',1]],Comida:[['arroz',1],['salmon',1],['verduras',1.5]],Cena:[['legumbres',1],['huevo',2],['ensalada',1]]},
+{Desayuno:[['huevo',2],['pan',1],['platano',1]],Comida:[['pollo',1],['pasta',1],['ensalada',1],['aceite',1]],Cena:[['ternera',.8],['verduras',1.5],['patata',1]]},
+{Desayuno:[['avena',1],['yogur',1.5],['manzana',1]],Comida:[['legumbres',1.5],['pavo',1],['ensalada',1]],Cena:[['salmon',1],['arroz',.8],['verduras',1]]}
+];
+const mealNames=['Desayuno','Comida','Cena'];
+const round=x=>Math.round(x*10)/10;
+const date=()=>n09Date();
+const lookup=k=>catalog.find(x=>x[0]===k);
+function ensure(){db.v18Menus??={}}
+function fresh(d){let day=new Date(d+'T12:00:00').getDay(),source=menus[(day+6)%7];return Object.fromEntries(mealNames.map(m=>[m,source[m].map(([key,servings])=>({uid:id(),key,servings}))]))}
+function plan(d){ensure();return db.v18Menus[d]||null}
+function item(x){let c=lookup(x.key);if(!c)return null;return {key:c[0],name:c[1],grams:round(c[2]*x.servings),kcal:round(c[3]*x.servings),protein:round(c[4]*x.servings),carbs:round(c[5]*x.servings),fat:round(c[6]*x.servings)}}
+function totals(xs){return xs.reduce((a,x)=>{let i=item(x);if(i)for(let k of ['kcal','protein','carbs','fat'])a[k]+=i[k];return a},{kcal:0,protein:0,carbs:0,fat:0})}
+function category(k){return Object.keys(groups).find(g=>groups[g].includes(k))||'other'}
+function swaps(k){let c=lookup(k);if(!c)return[];let g=category(k);return groups[g].filter(v=>v!==k&&lookup(v)).map(v=>{let a=lookup(v),idx=({protein:4,carb:5,fat:6,fruit:5,veg:3,dairy:3,other:3})[g],target=c[idx]||c[3],factor=target/(a[idx]||a[3]||1);return {key:v,name:a[1],factor:Math.max(.1,Math.min(8,factor))}})}
+function menuHTML(){let d=date(),p=plan(d),all=p?mealNames.flatMap(m=>p[m]||[]):[],t=totals(all),actual=db.foodLogs.filter(x=>x.date===d),used=actual.reduce((n,e)=>n+n09Totals(e.items||[]).kcal,0);return `<div class="v18-hero"><div class="v18-top"><div><div class="v18-day">🍽️ TU PLAN DE ALIMENTACIÓN · ${esc(d)}</div><h2>Menú del día</h2><small>3 comidas · cantidades y sustituciones</small></div><span class="chip">Plan editable</span></div><div class="v18-tiles"><div class="v18-tile"><b>${Math.round(t.kcal)}</b><small>kcal previstas</small></div><div class="v18-tile"><b>${Math.round(t.protein)} g</b><small>Proteínas</small></div><div class="v18-tile"><b>${Math.round(t.carbs)} g</b><small>Hidratos</small></div></div><div class="v18-pills"><span>Grasas: ${Math.round(t.fat)} g</span><span>Registradas: ${Math.round(used)} kcal</span></div><div class="v18-warning">Menú orientativo, no una prescripción clínica. Pesos de arroz, pasta, patata y legumbres: cocidos; carnes y pescado: cantidades orientativas del catálogo, cuya condición en crudo o cocido debe verificarse. Comprueba etiquetas y ajusta las necesidades con un profesional.</div></div>${p?mealNames.map((m,mi)=>{let foods=p[m]||[],mt=totals(foods);return `<div class="v18-meal"><div class="v18-mealhead"><h3>${['☕','🥘','🌙'][mi]} ${m}</h3><small>${Math.round(mt.kcal)} kcal · ${Math.round(mt.protein)} g proteína</small></div>${foods.map((f,i)=>{let a=item(f);if(!a)return '';let choices=swaps(f.key);return `<div class="v18-food"><div class="v18-foodmain"><strong>${esc(a.name)}</strong><small><b>${a.grams} g</b> · ${Math.round(a.kcal)} kcal</small></div><div class="v18-meta">P ${a.protein} g · HC ${a.carbs} g · G ${a.fat} g</div><div class="v18-actions"><button onclick="v18Qty('${m}',${i})">✏️ Cantidad</button><button onclick="v18Swap('${m}',${i})">⇄ Sustituir</button><button onclick="v18Remove('${m}',${i})">Quitar</button></div><div id="v18-slot-${mi}-${i}"></div></div>`}).join('')}<div class="v18-foot"><button onclick="v18Add('${m}')">＋ Añadir alimento</button><button class="primary" onclick="v18Consume('${m}')">✓ Registrar como consumida</button></div></div>`}).join('')+`<div class="v18-actions"><button onclick="v18Reset()">↻ Restablecer menú de este día</button></div>`:`<div class="card"><h3>Prepara el menú de hoy</h3><p class="muted">Genera un menú orientativo con cantidades que podrás cambiar alimento por alimento. No se registrará como consumido hasta que lo confirmes.</p><button class="primary" onclick="v18Generate()">🍽️ Generar menú del día</button></div>`}`}
+function redraw(){let host=$('v18MenuHost');if(host)host.innerHTML=menuHTML()}
+window.v18Generate=function(){ensure();let d=date();if(db.v18Menus[d]&&!confirm('¿Sustituir el menú de este día?'))return;db.v18Menus[d]=fresh(d);persist();redraw()};
+window.v18Reset=function(){if(!confirm('¿Restablecer el menú de este día?'))return;db.v18Menus[date()]=fresh(date());persist();redraw()};
+window.v18Qty=function(m,i){let f=plan(date())?.[m]?.[i],c=lookup(f?.key);if(!c)return;let v=prompt(`Cantidad de ${c[1]} en gramos (referencia: ${round(c[2]*f.servings)} g)`,String(round(c[2]*f.servings)));if(v===null)return;let n=Number(v.replace(',','.'));if(!Number.isFinite(n)||n<=0||n>3000)return alert('Introduce una cantidad válida entre 1 y 3000 g.');f.servings=Math.round(n/c[2]*1000)/1000;persist();redraw()};
+window.v18Swap=function(m,i){let f=plan(date())?.[m]?.[i],c=lookup(f?.key);if(!c)return;let choices=swaps(f.key);if(!choices.length)return alert('No hay alternativas del mismo grupo en el catálogo.');let msg=`Sustituir ${c[1]} (${round(c[2]*f.servings)} g).\nElige un número:\n`+choices.map((x,j)=>`${j+1}. ${x.name} ≈ ${round(lookup(x.key)[2]*f.servings*x.factor)} g`).join('\n');let n=prompt(msg,'1');if(n===null)return;let z=choices[Number(n)-1];if(!z)return alert('Elige una alternativa válida.');f.key=z.key;f.servings=Math.round(f.servings*z.factor*1000)/1000;persist();redraw()};
+window.v18Remove=function(m,i){let p=plan(date());if(!p)return;p[m].splice(i,1);persist();redraw()};
+window.v18Add=function(m){let list=catalog.map((c,i)=>`${i+1}. ${c[1]}`).join('\n');let n=prompt('Número del alimento que quieres añadir:\n'+list);if(n===null)return;let c=catalog[Number(n)-1];if(!c)return alert('Número no válido.');let grams=prompt(`Cantidad en gramos de ${c[1]}`,String(c[2]));if(grams===null)return;let q=Number(grams.replace(',','.'));if(!Number.isFinite(q)||q<=0||q>3000)return alert('Cantidad no válida.');plan(date())[m].push({uid:id(),key:c[0],servings:Math.round(q/c[2]*1000)/1000});persist();redraw()};
+window.v18Consume=function(m){let p=plan(date());if(!p||!p[m]?.length)return alert('Esta comida no tiene alimentos.');let d=date();if(db.foodLogs.some(x=>x.date===d&&x.meal===m)&&!confirm('Ya hay un registro de esta comida. ¿Añadir otro registro?'))return;let items=p[m].map(x=>{let c=lookup(x.key);return c?n09Make(c,x.servings):null}).filter(Boolean);db.foodLogs.push({id:id(),date:d,meal:m,items,at:new Date().toISOString(),source:'menu_v18'});persist();n09Render();};
+const prior=n09Render;
+n09Render=function(){prior();let target=$('nutrition09');if(!target)return;let host=document.createElement('div');host.id='v18MenuHost';target.insertBefore(host,target.firstChild);redraw()};
+// The original nutrition diary remains available beneath the meal plan.
+if($('nutrition09'))n09Render();
+})();
+</script>
+
 </body></html>
