@@ -1,5 +1,5 @@
 // Mi Entrenador - GitHub Pages, sin cachear los datos ni el HTML
-const CACHE = 'mi-entrenador-static-14';
+const CACHE = 'mi-entrenador-static-31';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(['./icon-192.png','./icon-512.png','./manifest.webmanifest'])));
   self.skipWaiting();
